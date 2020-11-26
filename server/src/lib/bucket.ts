@@ -63,7 +63,10 @@ export default class Bucket {
             audioSrc: this.getPublicUrl(path),
           });
         } else {
-          console.log(`clip_id ${id} was smaller than 256 bytes`);
+          console.log(
+            `clip_id ${id} by ${client_id} for sentence ${original_sentence_id} is smaller than 256 bytes`
+          );
+          this.deleteClip(id, client_id, original_sentence_id);
         }
 
         if (clipPromises.length == count) break;
@@ -77,6 +80,22 @@ export default class Bucket {
 
   getAvatarClipsUrl(path: string) {
     return this.getPublicUrl(path);
+  }
+
+  deleteClip(clipId: number, clientId: string, sentenceId: string) {
+    this.model.db.deleteClip(clipId);
+
+    this.s3.deleteObject(
+      {
+        Bucket: getConfig().BUCKET_NAME,
+        Key: `${clientId}/${sentenceId}`,
+      },
+      () => {
+        console.log(
+          `clip_id ${clipId} by ${clientId} for sentence ${sentenceId} has been removed`
+        );
+      }
+    );
   }
 
   async getClipUrl(id: string): Promise<string> {

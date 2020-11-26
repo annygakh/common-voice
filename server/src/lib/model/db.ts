@@ -981,4 +981,13 @@ export default class DB {
     }
     return challengeEnded;
   }
+
+  deleteClip(clip_id: number) {
+    this.mysql.query(
+      `
+      DELETE FROM clips WHERE id = ? LIMIT 1
+    `,
+      [clip_id]
+    );
+  }
 }
